@@ -1,0 +1,43 @@
+version: '3.0'
+
+services:
+  rabbitmq:
+    container_name: rabbitmq
+    hostname: rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - "7100:15672"
+      - "7101:5672"
+    volumes:
+      - rabbitmq:/rabbitmq
+  postgres:
+    container_name: postgres-service
+    image: postgres:13.3
+    environment:
+      POSTGRES_DB: "test"
+      POSTGRES_USER: "root"
+      POSTGRES_PASSWORD: "m12345"
+    ports:
+      - "5432:5432"
+  some-service1:
+    restart: always
+    depends_on:
+        - rabbitmq
+    build:
+      context: .
+      dockerfile: someservice1/Dockerfile
+    ports:
+      - "8081:80"
+  some-service2:
+    restart: always
+    depends_on:
+        - rabbitmq
+        - postgres
+    build:
+      context: .
+      dockerfile: someservice2/Dockerfile
+    ports:
+      - "8082:80"
+  
+volumes:
+    rabbitmq:
